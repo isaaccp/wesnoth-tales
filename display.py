@@ -20,7 +20,19 @@ class Display:
         self.select = pygame.image.load('images/terrain/select.png')
         self.grid = pygame.image.load('images/terrain/grid.png')
 
+        self.footsteps = {}
+        for s in ['in', 'out']:
+            for d in ['n', 'ne', 'se', 's', 'nw', 'sw']:
+                steps = '%s-%s' % (s, d)
+                image = 'images/footsteps/foot-normal-%s.png' % steps
+                self.footsteps[steps] = pygame.image.load(image)
+
+        #current selection
         self.selection = None
+
+        #current path
+        self.path = None
+        self.path_images = None
 
     def hex_width(self):
         return (self.zoom*3)/4
@@ -114,8 +126,17 @@ class Display:
         screen.blit(self.current, r)
 
         if self.selection:
-            if area.can_move(self.selected_unit(), loc):
+            self.path = area.can_move(self.selected_unit(), loc)
+            if self.path:
+                self.calculate_path_images()
                 self.cursor = self.cursors['move']
+                for pair in range(len(self.path_images)/2):
+                    l = self.path[pair]
+                    for i in range(2):
+                        img = self.path_images[pair*2+i]
+                        if img:
+                            r = self.rect(img, l)
+                            screen.blit(img, r)
             else:
                 self.cursor = self.cursors['normal']
             r = self.rect(self.select, self.selection)
@@ -164,3 +185,20 @@ class Display:
     def selected_unit(self):
         loc = self.selection
         return self.world.area.map[loc.x][loc.y]['character']
+
+    def calculate_path_images(self):
+        self.path_images = []
+        area = self.world.area
+        path = self.path
+        sense = ['in', 'out']
+        for i, t in enumerate(path):
+            for h in range(2):
+                if i == 0 and h == 0:
+                    self.path_images.append(None)
+                    continue
+                if i == len(path)-1 and h == 1:
+                    self.path_images.append(None)
+                    continue
+                direction = path[i+h].relative_dir(path[i+(h-1)])
+                steps = '%s-%s' % (sense[h], direction)
+                self.path_images.append(self.footsteps[steps])

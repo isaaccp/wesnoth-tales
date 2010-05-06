@@ -28,7 +28,6 @@ class Node:
 
     # return a list of nodes from the start position to the goal position
     def get_path(self, start):
-        print self.loc
         current = self
         path = []
         # start at the goal and follow the parent chain to the beginning
@@ -56,16 +55,16 @@ def find_path(area, unit, loc):
 
     while (len(pq) > 0):
         node = heapq.heappop(pq)
-        if node.loc not in visited:
-            if node.loc == loc:
-                return node.get_path(start)
-            else:
-                children = node.get_children()
-                for child in children:
+        if node.loc == loc:
+            return node.get_path(start)
+        else:
+            children = node.get_children()
+            for child in children:
+                if not child.loc in visited:
                     child.set_parent(node)
                     heapq.heappush(pq, child)
-                visited[node.loc] = True
-                pq.sort(compare)  # keep less costly nodes at the front
+            visited[node.loc] = True
+            pq.sort(compare)  # keep less costly nodes at the front
     return None
 
 # comparison function for keeping our priority queue in order

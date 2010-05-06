@@ -113,9 +113,10 @@ class Area:
             return False
         if self.map[loc.x][loc.y].has_key('character'):
             return False
-        if not self.find_path(unit, loc):
+        path = self.find_path(unit, loc)
+        if not path:
             return False
-        return True
+        return path
 
     def can_pass(self, unit, loc): 
         if self.map[loc.x][loc.y]['tile']['type'] != 'normal':
