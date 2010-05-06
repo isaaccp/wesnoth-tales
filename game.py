@@ -5,7 +5,7 @@ from constants import *
 class Game:
     def __init__(self):
         pygame.init()
-
+        pygame.mouse.set_visible(False)
         self.size = width, height = screen_width, screen_height
         self.screen = pygame.display.set_mode(self.size)
         self.states = [] 
@@ -51,6 +51,8 @@ class Game:
                         self.pop_state()
                     if self.exit:
                         break
+                    self.states[-1].process_event(e)
+                elif e.type == pygame.MOUSEBUTTONDOWN:
                     self.states[-1].process_event(e)
 
             if self.exit:

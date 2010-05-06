@@ -8,6 +8,5 @@ class Character:
         self.unique = None
         self.image = pygame.image.load('images/units/%s.png' % name)
 
-    def set_location(self, x, y):
-        self.x = x
-        self.y = y
+    def set_location(self, loc):
+        self.x, self.y = loc

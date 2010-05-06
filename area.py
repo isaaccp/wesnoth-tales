@@ -3,6 +3,7 @@ import pygame
 from random import randint
 from numpy import array, empty
 from constants import *
+from character import Character
 
 class Location:
     def __init__(self, x, y):
@@ -23,6 +24,18 @@ class Area:
 
         self.load(area)
         self.w, self.h = self.map.shape
+
+        self.characters = []
+        ranger = Character('ranger')
+        self.place_character(ranger, (6,0))
+
+    def place_character(self, character, loc):
+        """Places a character in the map for the first time"""
+        x, y = loc
+        #FIXME: check for already existing characters
+        character.set_location(loc)
+        self.characters.append(character)
+        self.map[x][y]['character'] = character
 
     def load(self, area):
         f = open('data/world/%s' % area)
@@ -92,11 +105,15 @@ class Area:
                     self.map[i][j]['volume_image'] = \
                         self.select_image(t['volume'], t['volume_prob_sum'])
 
-    def can_move(self, unit, x, y): 
-        if x < 0 or x >= self.w:
+    def can_move(self, unit, loc): 
+        #FIXME: probably we want to remove this trivial check from here
+        # by ensuring this method is always called on a proper loc
+        if loc.x < 0 or loc.x >= self.w:
             return False
-        if y < 0 or y >= self.h:
+        if loc.y < 0 or loc.y >= self.h:
             return False
-        if self.map[x][y]['tile']['type'] == 'normal':
-            return True
-        return False
+        if self.map[loc.x][loc.y]['tile']['type'] != 'normal':
+            return False
+        if self.map[loc.x][loc.y].has_key('character'):
+            return False
+        return True

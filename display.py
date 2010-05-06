@@ -11,8 +11,16 @@ class Display:
         self.zoom = tile_size
         self.x_pos = 0
         self.y_pos = 0
+        self.cursors = {}
+        for c in ['normal', 'select-location', 'move', 'attack']:
+            self.cursors[c] = pygame.image.load('images/cursors/%s.png' % c)
+
+        self.cursor = self.cursors['normal']
+        self.current = pygame.image.load('images/terrain/cursor.png')
         self.select = pygame.image.load('images/terrain/select.png')
         self.grid = pygame.image.load('images/terrain/grid.png')
+
+        self.selection = None
 
     def hex_width(self):
         return (self.zoom*3)/4
@@ -94,15 +102,29 @@ class Display:
                             r = self.rect(text, loc)
                             screen.blit(text, r)
 
-        for c in self.world.characters:
+        for c in area.characters:
             loc = Location(c.x, c.y)
             r = self.rect(c.image, loc)
             screen.blit(c.image, r)
-            
+        
         mouse = pygame.mouse.get_pos()
         loc = self.pixel_position_to_hex(mouse)
-        r = self.rect(self.select, loc)
-        screen.blit(self.select, r)
+
+        r = self.rect(self.current, loc)
+        screen.blit(self.current, r)
+
+        if self.selection:
+            if area.can_move(self.selected_unit(), loc):
+                self.cursor = self.cursors['move']
+            else:
+                self.cursor = self.cursors['normal']
+            r = self.rect(self.select, self.selection)
+            screen.blit(self.select, r)
+        else:
+            self.cursor = self.cursors['normal']
+
+        r = mouse
+        screen.blit(self.cursor, r)
                         
         screen.set_clip(clip_rect)
 
@@ -127,4 +149,18 @@ class Display:
                 self.h_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
 
     def process_event(self, event):
-        pass
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            loc = self.pixel_position_to_hex(event.pos)
+            if event.button == 1:
+                if self.world.area.map[loc.x][loc.y].has_key('character'):
+                    self.set_selection(loc)
+            elif event.button == 3:
+                if self.selection:
+                    self.selection = None
+
+    def set_selection(self, loc):
+        self.selection = loc
+
+    def selected_unit(self):
+        loc = self.selection
+        return self.world.area.map[loc.x][loc.y]['character']
