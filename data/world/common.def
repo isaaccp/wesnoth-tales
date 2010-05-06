@@ -1,0 +1,24 @@
+tiles:
+    - char: ','
+      name: 'grass'
+      flat:
+         - file: 'terrain/grass'
+           prob: 10
+         - file: 'terrain/grass-flowers'
+           prob: 1
+      type: normal
+    - char: 'T'
+      name: 'forest'
+      volume:
+        - file: 'terrain/dense-forest'
+          prob: 1
+      flat:
+         - file: 'terrain/grass'
+           prob: 1
+      type: block
+    - char: '~'
+      name: 'water'
+      flat:
+        - file: 'terrain/water'
+          prob: 1
+      type: block

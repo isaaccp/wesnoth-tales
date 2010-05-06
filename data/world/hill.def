@@ -1,0 +1,10 @@
+tiles:
+    - char: 'd'
+      name: 'grass_with_trapdoor'
+      flat:
+         - file: 'terrain/grass'
+           prob: 1
+      volume:
+         - file: 'scenery/trapdoor-open'
+           prob: 1
+      type: normal

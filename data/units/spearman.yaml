@@ -1,0 +1,9 @@
+name: spearman
+plural: spearmen
+str: 3
+def: 2 
+color_keys:
+    - [41, 42, 76]
+    - [35, 75, 150]
+    - [17, 140, 232]
+    - [76, 206, 210]
