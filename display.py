@@ -1,5 +1,5 @@
 import pygame
-from area import Location
+from location import Location
 from constants import *
 
 class Display:

@@ -1,4 +1,5 @@
 import pygame
+from location import Location
 
 class Character:
     def __init__(self, name):
@@ -7,6 +8,9 @@ class Character:
         self.y = None
         self.unique = None
         self.image = pygame.image.load('images/units/%s.png' % name)
+
+    def location(self):
+        return Location(self.x, self.y)
 
     def set_location(self, loc):
         self.x, self.y = loc

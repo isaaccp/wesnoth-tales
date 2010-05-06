@@ -4,14 +4,8 @@ from random import randint
 from numpy import array, empty
 from constants import *
 from character import Character
-
-class Location:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return "(%d, %d)" % (self.x, self.y)
+from location import Location
+import a_star
 
 class Area:
     def __init__(self, area):
@@ -116,4 +110,17 @@ class Area:
             return False
         if self.map[loc.x][loc.y].has_key('character'):
             return False
+        if not self.find_path(unit, loc):
+            return False
         return True
+
+    def can_pass(self, unit, loc): 
+        if self.map[loc.x][loc.y]['tile']['type'] != 'normal':
+            return False
+        return True
+
+    def find_path(self, unit, loc):
+        #FIXME: cache paths
+        path = a_star.find_path(self, unit, loc) 
+        print path
+        return path
