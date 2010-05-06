@@ -16,6 +16,9 @@ class Area:
         self.x_pos = 0
         self.y_pos = 0
 
+        # hash to cache paths
+        self.paths = {}
+
         self.load(area)
         self.w, self.h = self.map.shape
 
@@ -120,7 +123,9 @@ class Area:
         return True
 
     def find_path(self, unit, loc):
-        #FIXME: cache paths
-        path = a_star.find_path(self, unit, loc) 
-        print path
-        return path
+        #FIXME: remember to invalidate paths
+        path_id = (unit, loc)
+        if not self.paths.has_key(path_id):
+            self.paths[path_id] = a_star.find_path(self, unit, loc)
+
+        return self.paths[path_id]
