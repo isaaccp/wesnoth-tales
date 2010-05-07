@@ -103,6 +103,24 @@ class Display:
 
         self.x_pos = x - screen_width/2
         self.y_pos = y - screen_height/2
+        self.fix_position()
+
+    def fix_position(self):
+        self.fix_position_x()
+        self.fix_position_y()
+
+    def fix_position_x(self):
+        if self.x_pos > (self.world.area.w * self.hex_width()) - self.map_area.w:
+            self.x_pos = (self.world.area.w * self.hex_width()) - self.map_area.w
+        if self.x_pos < 0:
+            self.x_pos = 0
+
+    def fix_position_y(self):
+        if self.y_pos > (self.world.area.h * self.hex_size()) - self.map_area.h:
+            self.y_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
+
+        if self.y_pos < 0:
+            self.y_pos = 0
 
     def draw(self, screen):
         area = self.world.area
@@ -183,20 +201,17 @@ class Display:
             scroll = int(scroll_step * proportion)
             if mouse[0] < scroll_area_size:
                 self.x_pos = self.x_pos - scroll
-                if self.x_pos < 0:
-                    self.x_pos = 0
+                self.fix_position_x()
             elif mouse[0] > screen_width - scroll_area_size: 
                 self.x_pos = self.x_pos + scroll
-                if self.x_pos > (self.world.area.w * self.hex_width()) - self.map_area.w:
-                    self.x_pos = (self.world.area.w * self.hex_width()) - self.map_area.w
+                self.fix_position_x()
+
             if mouse[1] < scroll_area_size:
                 self.y_pos = self.y_pos - scroll
-                if self.y_pos < 0:
-                    self.y_pos = 0
+                self.fix_position_y()
             elif mouse[1] > screen_height - scroll_area_size: 
                 self.y_pos = self.y_pos + scroll
-                if self.y_pos > (self.world.area.h * self.hex_size()) - self.map_area.h:
-                    self.h_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
+                self.fix_position_y()
 
     def process_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
