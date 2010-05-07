@@ -1,0 +1,3 @@
+import common.def
+map cave.map
+gate 1 hill.area 2

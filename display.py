@@ -71,6 +71,16 @@ class Display:
         
         return Location(x_base + x_modifier, y_base + y_modifier)
 
+    def get_absolute_location_x(self, loc): 
+        return self.map_area.x + loc.x * self.hex_width()
+
+    def get_absolute_location_y(self, loc):
+        y = self.map_area.y + loc.y * self.zoom
+        if (loc.x % 2) == 1:
+            return y + self.zoom/2
+        else:
+            return y
+
     def get_location_x(self, loc): 
         return self.map_area.x + loc.x * self.hex_width() - self.x_pos
 
@@ -86,22 +96,38 @@ class Display:
         y = self.get_location_y(loc) + self.hex_size()/2 - image.get_height()/2
         return (x,y)
 
+    def center_view(self):
+        loc = self.world.area.characters[0].location()
+        x = self.get_absolute_location_x(loc)
+        y = self.get_absolute_location_y(loc)
+
+        self.x_pos = x - screen_width/2
+        self.y_pos = y - screen_height/2
+
     def draw(self, screen):
+        area = self.world.area
+        screen.fill((0,0,0))
         loc1 = self.pixel_position_to_hex((0,0))
         loc2 = self.pixel_position_to_hex((self.map_area.w, self.map_area.h))
+        loc2.x = loc2.x + 1
+        loc2.y = loc2.y + 1
+        for l in (loc1, loc2):
+            if l.x < 0:
+                l.x = 0
+            elif l.x >= area.w:
+                l.x = area.w - 1
+            if l.y < 0:
+                l.y = 0
+            elif l.y >= area.h:
+                l.y = area.h - 1
         font = pygame.font.SysFont("Courier New",14)
         clip_rect = screen.set_clip(self.map_area)
-        area = self.world.area
         for l in ['flat', 'volume', 'debug']:
             cur_layer = '%s_image' % l
             for i in range(loc1.x, loc2.x + 1):
                 for j in range(loc1.y, loc2.y + 1):
+                    t = area.map[i][j]
                     loc = Location(i, j)
-                    r = self.rect(self.grid, loc)
-                    try:
-                        t = area.map[i][j]
-                    except Exception as inst:
-                        break
                     if t.has_key(cur_layer):
                         r = self.rect(t[cur_layer], loc)
                         screen.blit(t[cur_layer], r)
@@ -115,8 +141,7 @@ class Display:
                             screen.blit(text, r)
 
         for c in area.characters:
-            loc = Location(c.x, c.y)
-            r = self.rect(c.image, loc)
+            r = self.rect(c.image, c.loc)
             screen.blit(c.image, r)
         
         mouse = pygame.mouse.get_pos()
@@ -149,35 +174,49 @@ class Display:
                         
         screen.set_clip(clip_rect)
 
-    def update(self, proportion):
-        mouse = pygame.mouse.get_pos()
-        scroll = int(scroll_step * proportion)
-        if mouse[0] < scroll_area_size:
-            self.x_pos = self.x_pos - scroll
-            if self.x_pos < 0:
-                self.x_pos = 0
-        elif mouse[0] > screen_width - scroll_area_size: 
-            self.x_pos = self.x_pos + scroll
-            if self.x_pos > (self.world.area.w * self.hex_width()) - self.map_area.w:
-                self.x_pos = (self.world.area.w * self.hex_width()) - self.map_area.w
-        if mouse[1] < scroll_area_size:
-            self.y_pos = self.y_pos - scroll
-            if self.y_pos < 0:
-                self.y_pos = 0
-        elif mouse[1] > screen_height - scroll_area_size: 
-            self.y_pos = self.y_pos + scroll
-            if self.y_pos > (self.world.area.h * self.hex_size()) - self.map_area.h:
-                self.h_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
+    def update(self, proportion, new_area):
+        if new_area:
+            self.center_view()
+        else:
+            #scroll
+            mouse = pygame.mouse.get_pos()
+            scroll = int(scroll_step * proportion)
+            if mouse[0] < scroll_area_size:
+                self.x_pos = self.x_pos - scroll
+                if self.x_pos < 0:
+                    self.x_pos = 0
+            elif mouse[0] > screen_width - scroll_area_size: 
+                self.x_pos = self.x_pos + scroll
+                if self.x_pos > (self.world.area.w * self.hex_width()) - self.map_area.w:
+                    self.x_pos = (self.world.area.w * self.hex_width()) - self.map_area.w
+            if mouse[1] < scroll_area_size:
+                self.y_pos = self.y_pos - scroll
+                if self.y_pos < 0:
+                    self.y_pos = 0
+            elif mouse[1] > screen_height - scroll_area_size: 
+                self.y_pos = self.y_pos + scroll
+                if self.y_pos > (self.world.area.h * self.hex_size()) - self.map_area.h:
+                    self.h_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
 
     def process_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             loc = self.pixel_position_to_hex(event.pos)
             if event.button == 1:
-                if self.world.area.map[loc.x][loc.y].has_key('character'):
-                    self.set_selection(loc)
+                if not self.selection:
+                    if self.world.area.map[loc.x][loc.y].has_key('character'):
+                        self.set_selection(loc)
+                else:
+                    unit = self.selected_unit()
+                    path = self.world.area.can_move(unit, loc)
+                    if path:
+                        unit.move(path)
+                        self.set_selection(None)
             elif event.button == 3:
                 if self.selection:
                     self.selection = None
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_c:
+                self.center_view()
 
     def set_selection(self, loc):
         self.selection = loc

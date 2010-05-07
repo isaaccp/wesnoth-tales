@@ -22,3 +22,25 @@ tiles:
         - file: 'terrain/water'
           prob: 1
       type: block
+    - char: '_'
+      name: 'cave'
+      flat:
+        - file: 'terrain/cave1'
+          prob: 1
+        - file: 'terrain/cave2'
+          prob: 1
+        - file: 'terrain/cave3'
+          prob: 1
+        - file: 'terrain/cave4'
+          prob: 1
+        - file: 'terrain/cave5'
+          prob: 1
+        - file: 'terrain/cave6'
+          prob: 1
+      type: normal
+    - char: 'X'
+      name: 'cave-wall'
+      flat:
+        - file: 'terrain/wall-cave'
+          prob: 1
+      type: block

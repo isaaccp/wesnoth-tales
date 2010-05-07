@@ -8,13 +8,14 @@ from location import Location
 import a_star
 
 class Area:
-    def __init__(self, area):
+    def __init__(self, area, gate=1):
         self.tiles = {}
         self.area = area
         self.map = None
         self.gates = {}
-        self.x_pos = 0
-        self.y_pos = 0
+
+        self.transition = None
+        self.characters = []
 
         # hash to cache paths
         self.paths = {}
@@ -22,17 +23,29 @@ class Area:
         self.load(area)
         self.w, self.h = self.map.shape
 
-        self.characters = []
         ranger = Character('ranger')
-        self.place_character(ranger, (6,0))
+        self.place_character(ranger, self.gates[gate]['tiles'][0])
 
     def place_character(self, character, loc):
         """Places a character in the map for the first time"""
-        x, y = loc
         #FIXME: check for already existing characters
         character.set_location(loc)
         self.characters.append(character)
-        self.map[x][y]['character'] = character
+        self.map[loc.x][loc.y]['character'] = character
+
+    def move_character(self, character, loc, moves_left):
+        """Moves the character in the map"""
+        #FIXME: check for already existing characters
+        del self.map[character.loc.x][character.loc.y]['character']
+        character.set_location(loc)
+        self.map[loc.x][loc.y]['character'] = character
+        self.invalidate_paths()
+        gate = self.has_gate(loc)
+        if gate and not moves_left:
+            self.transition = self.gates[gate]
+
+    def invalidate_paths(self):
+        self.paths = {}
 
     def load(self, area):
         f = open('data/world/%s' % area)
@@ -43,6 +56,17 @@ class Area:
                 self.load_yaml(parts[1])
             elif parts[0] == 'map':
                 self.load_map(parts[1])
+            elif parts[0] == 'gate':
+                gate = int(parts[1])
+                next_area = parts[2]
+                if next_area == 'world':
+                    next_gate = self.area
+                else:
+                    next_gate = int(parts[3])
+                self.gates[gate]['next'] = {
+                    'area': next_area,
+                    'gate': next_gate
+                }
 
     def load_yaml(self, yaml_file):
         f = open('data/world/%s' % yaml_file)
@@ -93,8 +117,10 @@ class Area:
                         gate = int(extra)
                         self.map[i][j]['gate'] = gate
                         if not self.gates.has_key(gate):
-                            self.gates[gate] = []
-                        self.gates[gate].append((i,j))
+                            self.gates[gate] = {}
+                        if not self.gates[gate].has_key('tiles'):
+                            self.gates[gate]['tiles'] = []
+                        self.gates[gate]['tiles'].append(Location(i,j))
 
                 self.map[i][j]['flat_image'] = self.select_image(t['flat'],
                     t['flat_prob_sum'])
@@ -123,6 +149,12 @@ class Area:
             return False
         return True
 
+    def has_gate(self, loc):
+        if self.map[loc.x][loc.y].has_key('gate'):
+            return self.map[loc.x][loc.y]['gate']
+        else:
+            return False
+
     def find_path(self, unit, loc):
         #FIXME: remember to invalidate paths
         path_id = (unit, loc)
@@ -130,3 +162,7 @@ class Area:
             self.paths[path_id] = a_star.find_path(self, unit, loc)
 
         return self.paths[path_id]
+
+    def update(self, proportion):
+        for c in self.characters:
+            c.update(self, proportion)
