@@ -1,0 +1,4 @@
+import common.def
+map fort_tahn.map
+gate 1 world
+gate 2 world

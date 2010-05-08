@@ -44,3 +44,58 @@ tiles:
         - file: 'terrain/wall-cave'
           prob: 1
       type: block
+    - char: 'h'
+      name: 'small-house'
+      flat:
+        - file: 'terrain/grass'
+          prob: 1
+      volume:
+        - file: 'terrain/human-house-small'
+          prob: 1
+      type: block
+    - char: 'H'
+      name: 'big-house'
+      flat:
+        - file: 'terrain/grass'
+          prob: 1
+      volume:
+        - file: 'terrain/human-house-barn'
+          prob: 1
+        - file: 'terrain/human-house-big'
+          prob: 1
+      type: block
+    - char: 'F'
+      name: 'fancy-house'
+      flat:
+        - file: 'terrain/grass'
+          prob: 1
+      volume:
+        - file: 'terrain/human-house-fancy-small'
+          prob: 1
+        - file: 'terrain/human-house-fancy-big'
+          prob: 1
+      type: block
+    - char: 'o'
+      name: 'stone-path'
+      flat:
+        - file: 'terrain/stone-path'
+          prob: 1
+      type: normal
+    - char: 'd'
+      name: 'dirt'
+      flat:
+        - file: 'terrain/dirt1'
+          prob: 1
+        - file: 'terrain/dirt2'
+          prob: 1
+        - file: 'terrain/dirt3'
+          prob: 1
+        - file: 'terrain/dirt4'
+          prob: 1
+        - file: 'terrain/dirt5'
+          prob: 1
+        - file: 'terrain/dirt6'
+          prob: 1
+        - file: 'terrain/dirt7'
+          prob: 1
+      type: normal

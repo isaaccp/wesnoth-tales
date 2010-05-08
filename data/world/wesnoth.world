@@ -1,5 +1,5 @@
 map: 'wesnoth'
-start_area: 'dulatus_hills.area'
+start_area: 'fort_tahn.area'
 areas:
     - name: 'Fort Tahn'
       pos: [349, 689]
