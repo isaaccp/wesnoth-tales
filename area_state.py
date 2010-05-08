@@ -1,12 +1,12 @@
 import pygame
 from location import Location
+from state import State
 from constants import *
 
-class Display:
-    layers = ('TERRAIN', 'UNIT')
-
-    def __init__(self, world):
-        self.world = world
+class AreaState(State):
+    def __init__(self, game):
+        self.game = game
+        self.world = game.world
         self.map_area = pygame.Rect(0, 0, screen_width, screen_height)
         self.zoom = tile_size
         self.x_pos = 0
@@ -26,6 +26,11 @@ class Display:
                 steps = '%s-%s' % (s, d)
                 image = 'images/footsteps/foot-normal-%s.png' % steps
                 self.footsteps[steps] = pygame.image.load(image)
+
+    def set_area(self, area, gate=1):
+        self.area = area
+        area.place_hero_in_gate(gate)
+        self.center_view()
 
         #current selection
         self.selection = None
@@ -97,7 +102,7 @@ class Display:
         return (x,y)
 
     def center_view(self):
-        loc = self.world.area.characters[0].location()
+        loc = self.area.characters[0].location()
         x = self.get_absolute_location_x(loc)
         y = self.get_absolute_location_y(loc)
 
@@ -110,20 +115,20 @@ class Display:
         self.fix_position_y()
 
     def fix_position_x(self):
-        if self.x_pos > (self.world.area.w * self.hex_width()) - self.map_area.w:
-            self.x_pos = (self.world.area.w * self.hex_width()) - self.map_area.w
+        if self.x_pos > (self.area.w * self.hex_width()) - self.map_area.w:
+            self.x_pos = (self.area.w * self.hex_width()) - self.map_area.w
         if self.x_pos < 0:
             self.x_pos = 0
 
     def fix_position_y(self):
-        if self.y_pos > (self.world.area.h * self.hex_size()) - self.map_area.h:
-            self.y_pos = (self.world.area.h * self.hex_size()) - self.map_area.h
+        if self.y_pos > (self.area.h * self.hex_size()) - self.map_area.h:
+            self.y_pos = (self.area.h * self.hex_size()) - self.map_area.h
 
         if self.y_pos < 0:
             self.y_pos = 0
 
     def draw(self, screen):
-        area = self.world.area
+        area = self.area
         screen.fill((0,0,0))
         loc1 = self.pixel_position_to_hex((0,0))
         loc2 = self.pixel_position_to_hex((self.map_area.w, self.map_area.h))
@@ -192,37 +197,48 @@ class Display:
                         
         screen.set_clip(clip_rect)
 
-    def update(self, proportion, new_area):
-        if new_area:
-            self.center_view()
-        else:
-            #scroll
-            mouse = pygame.mouse.get_pos()
-            scroll = int(scroll_step * proportion)
-            if mouse[0] < scroll_area_size:
-                self.x_pos = self.x_pos - scroll
-                self.fix_position_x()
-            elif mouse[0] > screen_width - scroll_area_size: 
-                self.x_pos = self.x_pos + scroll
-                self.fix_position_x()
+    def update(self, proportion):
+        self.area.update(proportion)
 
-            if mouse[1] < scroll_area_size:
-                self.y_pos = self.y_pos - scroll
-                self.fix_position_y()
-            elif mouse[1] > screen_height - scroll_area_size: 
-                self.y_pos = self.y_pos + scroll
-                self.fix_position_y()
+        if self.area.transition:
+            t = self.area.transition['next']
+            #FIXME: in the future areas will suffer changes and we'll have
+            # to save the changes
+            #FIXME: probably transition shouldn't be in the area, but how?
+            self.area.transition = None
+            self.area.remove_hero()
+            if t['area'] == 'world':
+                self.game.pop_state()
+            else:
+                self.set_area(self.world.get_area(t['area']), t['gate'])
+
+        #scroll
+        mouse = pygame.mouse.get_pos()
+        scroll = int(scroll_step * proportion)
+        if mouse[0] < scroll_area_size:
+            self.x_pos = self.x_pos - scroll
+            self.fix_position_x()
+        elif mouse[0] > screen_width - scroll_area_size: 
+            self.x_pos = self.x_pos + scroll
+            self.fix_position_x()
+
+        if mouse[1] < scroll_area_size:
+            self.y_pos = self.y_pos - scroll
+            self.fix_position_y()
+        elif mouse[1] > screen_height - scroll_area_size: 
+            self.y_pos = self.y_pos + scroll
+            self.fix_position_y()
 
     def process_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             loc = self.pixel_position_to_hex(event.pos)
             if event.button == 1:
                 if not self.selection:
-                    if self.world.area.map[loc.x][loc.y].has_key('character'):
+                    if self.area.map[loc.x][loc.y].has_key('character'):
                         self.set_selection(loc)
                 else:
                     unit = self.selected_unit()
-                    path = self.world.area.can_move(unit, loc)
+                    path = self.area.can_move(unit, loc)
                     if path:
                         unit.move(path)
                         self.set_selection(None)
@@ -238,11 +254,11 @@ class Display:
 
     def selected_unit(self):
         loc = self.selection
-        return self.world.area.map[loc.x][loc.y]['character']
+        return self.area.map[loc.x][loc.y]['character']
 
     def calculate_path_images(self):
         self.path_images = []
-        area = self.world.area
+        area = self.area
         path = self.path
         sense = ['in', 'out']
         for i, t in enumerate(path):

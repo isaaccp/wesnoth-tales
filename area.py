@@ -23,8 +23,14 @@ class Area:
         self.load(area)
         self.w, self.h = self.map.shape
 
+    def place_hero_in_gate(self, gate):
         ranger = Character('ranger')
         self.place_character(ranger, self.gates[gate]['tiles'][0])
+
+    def remove_hero(self):
+        hero = self.characters.pop(0)
+        loc = hero.location()
+        self.map[loc.x][loc.y]['character'] = None
 
     def place_character(self, character, loc):
         """Places a character in the map for the first time"""

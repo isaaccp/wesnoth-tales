@@ -5,21 +5,27 @@ from display import Display
 
 class World:
     def __init__(self, world):
-        self.old_area = None
-        self.area = None
-        self.areas = None
+        self.main_areas = None
+        self.areas = {}
         self.world_map = None
         self.load_world(world)
-        self.display = Display(self)
         self.cursor = pygame.image.load('images/cursors/normal.png')
+
+    def get_start_area(self):
+        return self.get_area(self.start_area)
+
+    def get_area(self, area):
+        if not self.areas.has_key(area):
+            self.areas[area] = Area(area)
+        return self.areas[area]
 
     def load_world(self, name):
         f = open('data/world/%s' % name)
         data = yaml.load(f)
         f.close()
-        self.world_map = pygame.image.load('images/maps/%s.png' % data['image'])
-        self.area = Area(data['start_area'])
-        self.areas = data['areas']
+        self.map = data['map']
+        self.start_area = data['start_area']
+        self.main_areas = data['areas']
 
     def update(self, proportion):
         if self.area:
@@ -40,22 +46,3 @@ class World:
             if self.area:
                 # update display (i.e., scroll)
                 self.display.update(proportion, new_area)
-
-    def draw(self, screen):
-        if self.area:
-            self.display.draw(screen)
-        else:
-            screen.blit(self.world_map, (0,0))
-            for a in self.areas:
-                pygame.draw.rect(screen, (255, 0, 0),
-                    pygame.Rect(a['pos'], a['size']), 2)
-            mouse = pygame.mouse.get_pos()
-            r = mouse
-            screen.blit(self.cursor, r)
-
-
-
-
-
-    def process_event(self, event):
-        self.display.process_event(event)

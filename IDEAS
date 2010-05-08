@@ -1,0 +1,33 @@
+world
+ - several localized, named, accessible from main world areas
+ - several areas accessible only from other areas
+
+areas
+ - can be defined completely with a specific map, exact enemies and such or
+   loosely such as 'random forest with lvl 50 enemies and these two characters
+   and make sure these two items are in there too'. they will be random until
+   they are actually created, then they will saved and kept the same forever
+
+views
+-----
+world
+area
+area in combat
+characters
+plot status
+tale
+
+a tale happens in a world
+a tale has several characters, who can move between areas
+a world has different areas
+an area in a given moment has characters on it
+
+tale: world, characters, quests
+world: areas
+area: characters
+
+WorldViewController -> paints the world map
+AreaViewController -> paints an area
+
+how to manage area transition. we are in an AreaViewController and we have
+to change our area

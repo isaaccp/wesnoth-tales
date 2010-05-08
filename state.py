@@ -1,5 +1,4 @@
 import pygame
-from world import World
 
 class State:
     def enter(self):
@@ -29,16 +28,3 @@ class State:
     def process_event(self, event):
         """Provide method to process an event"""
         pass
-
-class WorldState(State):
-    def enter(self):
-        self.world = World('wesnoth.world')
-
-    def update(self, proportion):
-        self.world.update(proportion)
-
-    def draw(self, screen):
-        self.world.draw(screen)
-
-    def process_event(self, event):
-        self.world.process_event(event)

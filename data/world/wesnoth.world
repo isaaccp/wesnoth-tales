@@ -1,4 +1,4 @@
-image: 'wesnoth'
+map: 'wesnoth'
 start_area: 'dulatus_hills.area'
 areas:
     - name: 'Fort Tahn'
