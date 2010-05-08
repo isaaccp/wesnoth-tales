@@ -7,7 +7,7 @@ class Display:
 
     def __init__(self, world):
         self.world = world
-        self.map_area = pygame.Rect(0, 0, 640, 640)
+        self.map_area = pygame.Rect(0, 0, screen_width, screen_height)
         self.zoom = tile_size
         self.x_pos = 0
         self.y_pos = 0

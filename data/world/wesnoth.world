@@ -1,0 +1,11 @@
+image: 'wesnoth'
+start_area: 'dulatus_hills.area'
+areas:
+    - name: 'Fort Tahn'
+      pos: [349, 689]
+      size: [92, 46]
+      area: 'fort_tahn.area'
+    - name: 'Dulatus Hills'
+      pos: [437, 609]
+      size: [112, 61]
+      area: 'dulatus_hills.area'

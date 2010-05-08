@@ -32,7 +32,7 @@ class State:
 
 class WorldState(State):
     def enter(self):
-        self.world = World()
+        self.world = World('wesnoth.world')
 
     def update(self, proportion):
         self.world.update(proportion)

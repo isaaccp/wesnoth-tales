@@ -1,10 +1,10 @@
 #debug
-grid_enabled = True
-coords_enabled = True
+grid_enabled = False
+coords_enabled = False
 frametime_enabled = False
 
-screen_width = 640
-screen_height = 640
+screen_width = 1024
+screen_height = 768
 
 tile_size = 72
 
