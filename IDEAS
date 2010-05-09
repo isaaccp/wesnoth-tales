@@ -25,9 +25,3 @@ an area in a given moment has characters on it
 tale: world, characters, quests
 world: areas
 area: characters
-
-WorldViewController -> paints the world map
-AreaViewController -> paints an area
-
-how to manage area transition. we are in an AreaViewController and we have
-to change our area
