@@ -1,4 +1,5 @@
 import sys, pygame
+from story import Story
 from world import World
 from world_state import WorldState
 from area_state import AreaState
@@ -32,11 +33,11 @@ class Game:
             self.exit = True
 
     def start(self):
-        self.world = World('wesnoth.world')
+        self.story = Story('first')
         self.world_state = WorldState(self)
 
         self.area_state = AreaState(self)
-        self.area_state.set_area(self.world.get_start_area())
+        self.area_state.set_area(self.story.world.get_start_area())
 
         self.push_state(self.world_state)
         self.push_state(self.area_state)

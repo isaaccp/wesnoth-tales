@@ -17,11 +17,11 @@ characters
 plot status
 tale
 
-a tale happens in a world
-a tale has several characters, who can move between areas
+a story happens in a world
+a story has several characters, who can move between areas
 a world has different areas
 an area in a given moment has characters on it
 
-tale: world, characters, quests
+story: world, characters, quests
 world: areas
 area: characters

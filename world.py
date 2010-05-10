@@ -5,6 +5,7 @@ from display import Display
 
 class World:
     def __init__(self, world):
+        self.name = world
         self.main_areas = None
         self.areas = {}
         self.world_map = None
@@ -16,11 +17,11 @@ class World:
 
     def get_area(self, area):
         if not self.areas.has_key(area):
-            self.areas[area] = Area(area)
+            self.areas[area] = Area(self.name, area)
         return self.areas[area]
 
     def load_world(self, name):
-        f = open('data/world/%s' % name)
+        f = open('data/worlds/%s/world.yaml' % name)
         data = yaml.load(f)
         f.close()
         self.map = data['map']

@@ -8,7 +8,7 @@ from location import Location
 import a_star
 
 class Area:
-    def __init__(self, area, gate=1):
+    def __init__(self, world, area, gate=1):
         self.tiles = {}
         self.area = area
         self.map = None
@@ -20,7 +20,7 @@ class Area:
         # hash to cache paths
         self.paths = {}
 
-        self.load(area)
+        self.load(world, area)
         self.w, self.h = self.map.shape
 
     def place_hero_in_gate(self, gate):
@@ -57,20 +57,20 @@ class Area:
     def invalidate_paths(self):
         self.paths = {}
 
-    def load(self, area):
-        f = open('data/world/%s' % area)
+    def load(self, world, area):
+        f = open('data/worlds/%s/%s' % (world, area))
         data = yaml.load(f) 
         f.close()
         for i in data['import']:
-            self.load_import(i)
-        self.load_map(data['map']) 
+            self.load_import(world, i)
+        self.load_map(world, data['map']) 
         for g in data['gates']:
             gate = int(g['id'])
             dest = g['dest']
             self.gates[gate]['next'] = dest
 
-    def load_import(self, name):
-        f = open('data/world/%s' % name)
+    def load_import(self, world, name):
+        f = open('data/worlds/%s/%s' % (world, name))
         data = yaml.load(f) 
         f.close()
         for t in data['tiles']:
@@ -96,8 +96,8 @@ class Area:
             if rnd < sum:
                 return img['image']
 
-    def load_map(self, map_file):
-        f = open('data/world/%s' % map_file)
+    def load_map(self, world, name):
+        f = open('data/worlds/%s/%s' % (world, name))
         lines = [l.rstrip("\n") for l in f.readlines()]
         f.close()
 

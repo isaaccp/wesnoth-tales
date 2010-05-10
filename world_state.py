@@ -5,7 +5,7 @@ class WorldState(State):
     def __init__(self, game):
         self.cursor = pygame.image.load('images/cursors/normal.png')
         self.game = game
-        self.world = game.world
+        self.world = game.story.world
         self.map = pygame.image.load('images/maps/%s.png' % self.world.map)
 
     def enter(self):

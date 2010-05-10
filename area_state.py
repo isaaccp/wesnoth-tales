@@ -6,7 +6,7 @@ from constants import *
 class AreaState(State):
     def __init__(self, game):
         self.game = game
-        self.world = game.world
+        self.world = game.story.world
         self.map_area = pygame.Rect(0, 0, screen_width, screen_height)
         self.zoom = tile_size
         self.x_pos = 0
