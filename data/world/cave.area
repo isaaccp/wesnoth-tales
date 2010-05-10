@@ -1,3 +1,6 @@
-import common.def
-map cave.map
-gate 1 dulatus_hills.area 2
+import:
+    - 'common.def'
+map: 'cave.map'
+gates:
+    - id: 1
+      dest: {area: 'dulatus_hills.area', gate: 2 }

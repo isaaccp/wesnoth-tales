@@ -1,4 +1,10 @@
-import common.def
-map fort_tahn.map
-gate 1 world
-gate 2 world
+import:
+    - 'common.def'
+map: 'fort_tahn.map'
+gates:
+    - id: 1
+      dest: {area: 'world' }
+    - id: 2
+      dest: {area: 'world' }
+    - id: 3
+      dest: {area: 'world' }

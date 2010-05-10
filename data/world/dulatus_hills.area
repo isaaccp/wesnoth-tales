@@ -1,5 +1,9 @@
-import common.def
-import hill.def
-map hill.map
-gate 1 world
-gate 2 cave.area 1
+import:
+    - 'common.def'
+    - 'hill.def'
+map: 'hill.map'
+gates:
+    - id: 1
+      dest: {area: 'world' }
+    - id: 2
+      dest: {area: 'cave.area', gate: 1 }

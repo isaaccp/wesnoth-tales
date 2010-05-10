@@ -32,6 +32,9 @@ class Area:
         loc = hero.location()
         self.map[loc.x][loc.y]['character'] = None
 
+    def is_character_hero(self, character):
+        return character == self.characters[0]
+
     def place_character(self, character, loc):
         """Places a character in the map for the first time"""
         #FIXME: check for already existing characters
@@ -46,36 +49,28 @@ class Area:
         character.set_location(loc)
         self.map[loc.x][loc.y]['character'] = character
         self.invalidate_paths()
-        gate = self.has_gate(loc)
-        if gate and not moves_left:
-            self.transition = self.gates[gate]
+        if self.is_character_hero(character):
+            gate = self.has_gate(loc)
+            if gate and not moves_left:
+                self.transition = self.gates[gate]
 
     def invalidate_paths(self):
         self.paths = {}
 
     def load(self, area):
         f = open('data/world/%s' % area)
-        lines = f.readlines()
-        for l in lines:
-            parts = l.rstrip().split(' ')
-            if parts[0] == 'import':
-                self.load_yaml(parts[1])
-            elif parts[0] == 'map':
-                self.load_map(parts[1])
-            elif parts[0] == 'gate':
-                gate = int(parts[1])
-                next_area = parts[2]
-                if next_area == 'world':
-                    next_gate = self.area
-                else:
-                    next_gate = int(parts[3])
-                self.gates[gate]['next'] = {
-                    'area': next_area,
-                    'gate': next_gate
-                }
+        data = yaml.load(f) 
+        f.close()
+        for i in data['import']:
+            self.load_import(i)
+        self.load_map(data['map']) 
+        for g in data['gates']:
+            gate = int(g['id'])
+            dest = g['dest']
+            self.gates[gate]['next'] = dest
 
-    def load_yaml(self, yaml_file):
-        f = open('data/world/%s' % yaml_file)
+    def load_import(self, name):
+        f = open('data/world/%s' % name)
         data = yaml.load(f) 
         f.close()
         for t in data['tiles']:
