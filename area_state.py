@@ -39,6 +39,8 @@ class AreaState(State):
         self.path = None
         self.path_images = None
 
+        self.render_area()
+
     def hex_width(self):
         return (self.zoom*3)/4
 
@@ -96,6 +98,11 @@ class AreaState(State):
         else:
             return y
 
+    def abs_rect(self, image, loc):
+        x = self.get_absolute_location_x(loc) + self.hex_width()/2 - image.get_width()/2
+        y = self.get_absolute_location_y(loc) + self.hex_size()/2 - image.get_height()/2
+        return (x,y)
+
     def rect(self, image, loc):
         x = self.get_location_x(loc) + self.hex_width()/2 - image.get_width()/2
         y = self.get_location_y(loc) + self.hex_size()/2 - image.get_height()/2
@@ -127,41 +134,41 @@ class AreaState(State):
         if self.y_pos < 0:
             self.y_pos = 0
 
-    def draw(self, screen):
+    def render_area(self):
         area = self.area
-        screen.fill((0,0,0))
-        loc1 = self.pixel_position_to_hex((0,0))
-        loc2 = self.pixel_position_to_hex((self.map_area.w, self.map_area.h))
-        loc2.x = loc2.x + 1
-        loc2.y = loc2.y + 1
-        for l in (loc1, loc2):
-            if l.x < 0:
-                l.x = 0
-            elif l.x >= area.w:
-                l.x = area.w - 1
-            if l.y < 0:
-                l.y = 0
-            elif l.y >= area.h:
-                l.y = area.h - 1
+        width = self.get_absolute_location_x(Location(area.w, area.h))
+        height = self.get_absolute_location_y(Location(area.w, area.h))
+        s = pygame.Surface((width, height))
+
+        s.fill((0,0,0))
         font = pygame.font.SysFont("Courier New",14)
-        clip_rect = screen.set_clip(self.map_area)
         for l in ['flat', 'volume', 'debug']:
             cur_layer = '%s_image' % l
-            for i in range(loc1.x, loc2.x + 1):
-                for j in range(loc1.y, loc2.y + 1):
+            for i in range(area.w):
+                for j in range(area.h):
                     t = area.map[i][j]
                     loc = Location(i, j)
                     if t.has_key(cur_layer):
-                        r = self.rect(t[cur_layer], loc)
-                        screen.blit(t[cur_layer], r)
+                        r = self.abs_rect(t[cur_layer], loc)
+                        s.blit(t[cur_layer], r)
                     elif l == 'debug':
                         if grid_enabled:
-                            r = self.rect(self.grid, loc)
-                            screen.blit(self.grid, r)
+                            r = self.abs_rect(self.grid, loc)
+                            s.blit(self.grid, r)
                         if coords_enabled:
                             text = font.render('(%d,%d)' % (i,j),1,(0,0,0))
-                            r = self.rect(text, loc)
-                            screen.blit(text, r)
+                            r = self.abs_rect(text, loc)
+                            s.blit(text, r)
+
+        self.rendered = s
+
+    def draw(self, screen):
+        area = self.area
+        screen.fill((0, 0, 0))
+        screen.blit(self.rendered, (0, 0),
+            (self.x_pos, self.y_pos, self.map_area.w, self.map_area.h))
+
+        clip_rect = screen.set_clip(self.map_area)
 
         for c in area.characters:
             r = self.rect(c.image, c.loc)
