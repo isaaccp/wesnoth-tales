@@ -1,4 +1,5 @@
 import yaml
+from character import Character
 from world import World
 
 class Story:
@@ -11,3 +12,4 @@ class Story:
         data = yaml.load(f)
         f.close()
         self.world = World(data['world'])
+        self.hero = Character('data/stories/%s' % name, data['hero'])

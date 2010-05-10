@@ -23,9 +23,8 @@ class Area:
         self.load(world, area)
         self.w, self.h = self.map.shape
 
-    def place_hero_in_gate(self, gate):
-        ranger = Character('ranger')
-        self.place_character(ranger, self.gates[gate]['tiles'][0])
+    def place_hero_in_gate(self, hero, gate):
+        self.place_character(hero, self.gates[gate]['tiles'][0])
 
     def remove_hero(self):
         hero = self.characters.pop(0)

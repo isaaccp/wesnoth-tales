@@ -29,7 +29,7 @@ class AreaState(State):
 
     def set_area(self, area, gate=1):
         self.area = area
-        area.place_hero_in_gate(gate)
+        area.place_hero_in_gate(self.game.story.hero, gate)
         self.center_view()
 
         #current selection

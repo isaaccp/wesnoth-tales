@@ -1,17 +1,27 @@
+import yaml
 import pygame
 from constants import *
 from location import Location
 
 class Character:
-    def __init__(self, name):
+    def __init__(self, path, name):
         self.name = name
-        self.image = pygame.image.load('images/units/%s.png' % name)
+        self.load_character(path, name)
 
         self.loc = None
         self.dest = None
         self.path = None
         self.completion = None
         self.action = None
+
+    def load_character(self, path, name):
+        f = open('%s/%s.yaml' % (path, name))
+        data = yaml.load(f)
+        f.close()
+
+        self.char_class = data['class']
+        self.level = data['level']
+        self.image = pygame.image.load('images/units/%s.png' % data['image'])
 
     def location(self):
         return self.loc

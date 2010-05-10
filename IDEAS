@@ -25,3 +25,7 @@ an area in a given moment has characters on it
 story: world, characters, quests
 world: areas
 area: characters
+
+i should figure out sooner rather than later the best way to allow stories
+to mix images and units provided by the core with images and units provided
+by themselves
