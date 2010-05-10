@@ -49,9 +49,12 @@ class Game:
         #max duration to render a frame
         max_frame_time = 100
 
-        now = pygame.time.get_ticks()-1
+        time_last_frame = pygame.time.get_ticks()
         frames = 0
         time = 0
+
+        ms_per_frame = 1000/frames_per_second
+
         while not self.exit:
             #handle events
             for e in pygame.event.get():
@@ -70,26 +73,18 @@ class Game:
             if self.exit:
                 break
 
-            #get the current real time
-            t = pygame.time.get_ticks()
+            now = pygame.time.get_ticks()
+            time_since_last_frame = now - time_last_frame
 
-            #if elapsed time since last frame is too long...
-            if t - now > max_frame_time:
-                #slow the game down by resetting clock
-                now = t - step_size
-                #alternatively, do nothing and frames will auto-skip, which
-                #may cause the engine to never render!
+            if time_since_last_frame < ms_per_frame:
+                pygame.time.wait(ms_per_frame - time_since_last_frame)
+                now = pygame.time.get_ticks()
 
-            #this code will run only when enough time has passed, and will
-            #catch up to wall time if needed.
-            while(t-now > step_size):
-                #save old game state, update new game state based on step_size
-                now += step_size
-            else:
-                pygame.time.wait(10)
+            time_since_last_frame = now - time_last_frame
+            time_last_frame = now
+            proportion = float(time_since_last_frame) / ms_per_frame
 
-            #render game state. use 1.0/(step_size/(T-now)) for interpolat
-            self.top_state().update(1.0/(step_size/(t-now)))
+            self.top_state().update(proportion)
             if frametime_enabled:
                 before = pygame.time.get_ticks()
             self.top_state().draw(self.screen)
