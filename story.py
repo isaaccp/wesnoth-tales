@@ -12,4 +12,4 @@ class Story:
         data = yaml.load(f)
         f.close()
         self.world = World(data['world'])
-        self.hero = Character('data/stories/%s' % name, data['hero'])
+        self.hero = Character.load_from_file('data/stories/%s' % name, data['hero'])

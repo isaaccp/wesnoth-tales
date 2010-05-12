@@ -4,24 +4,38 @@ from constants import *
 from location import Location
 
 class Character:
-    def __init__(self, path, name):
-        self.name = name
-        self.load_character(path, name)
-
+    def __init__(self):
         self.loc = None
         self.dest = None
         self.path = None
         self.completion = None
         self.action = None
 
-    def load_character(self, path, name):
+    @staticmethod
+    def load_from_file(path, name):
         f = open('%s/%s.yaml' % (path, name))
         data = yaml.load(f)
         f.close()
 
-        self.char_class = data['class']
-        self.level = data['level']
-        self.image = pygame.image.load('images/units/%s.png' % data['image'])
+        return Character.load_from_data(data)
+
+    @staticmethod
+    def load_from_data(data):
+        char = Character()
+        if data.has_key('unit'):
+            #FIXME: load unit from file and be done with it
+            pass
+        else:
+            char.char_class = data['class']
+            char.race = data['race']
+            # FIXME: probably pass area info too and have a general level for
+            # creatures roaming the area instead of defaulting to one
+            if data.has_key('level'):
+                char.level = data['level']
+            else:
+                char.level = 1
+            char.image = pygame.image.load('images/units/%s.png' % data['class'])
+        return char
 
     def location(self):
         return self.loc

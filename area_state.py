@@ -29,6 +29,8 @@ class AreaState(State):
 
     def set_area(self, area, gate=1):
         self.area = area
+        # probably we want to clear the area and regenerate characters and all
+        # if enough time has passed since the last visit
         area.place_hero_in_gate(self.game.story.hero, gate)
         self.center_view()
 

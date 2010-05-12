@@ -1,6 +1,6 @@
 import yaml
 import pygame
-from random import randint
+from random import randint, choice
 from numpy import array, empty
 from constants import *
 from character import Character
@@ -21,32 +21,47 @@ class Area:
         self.paths = {}
 
         self.load(world, area)
-        self.w, self.h = self.map.shape
+
+    def recalculate_free_locations(self):
+        self.free_locations = {}
+        for i in range(self.w):
+            for j in range(self.h):
+                loc = Location(i, j)
+                if self.can_pass(None, loc):
+                    self.free_locations[loc] = True
+        return True
 
     def place_hero_in_gate(self, hero, gate):
-        self.place_character(hero, self.gates[gate]['tiles'][0])
+        self.place_character(hero, self.gates[gate]['tiles'][0], is_hero=True)
 
     def remove_hero(self):
         hero = self.characters.pop(0)
         loc = hero.location()
         self.map[loc.x][loc.y]['character'] = None
+        self.free_locations[l] = True
 
     def is_character_hero(self, character):
         return character == self.characters[0]
 
-    def place_character(self, character, loc):
+    def place_character(self, character, loc, is_hero=False):
         """Places a character in the map for the first time"""
         #FIXME: check for already existing characters
         character.set_location(loc)
-        self.characters.append(character)
+        if is_hero:
+            self.characters.insert(0, character)
+        else:
+            self.characters.append(character)
         self.map[loc.x][loc.y]['character'] = character
+        del self.free_locations[loc]
 
     def move_character(self, character, loc, moves_left):
         """Moves the character in the map"""
         #FIXME: check for already existing characters
         del self.map[character.loc.x][character.loc.y]['character']
+        self.free_locations[character.loc] = True
         character.set_location(loc)
         self.map[loc.x][loc.y]['character'] = character
+        del self.free_locations[character.loc]
         self.invalidate_paths()
         if self.is_character_hero(character):
             gate = self.has_gate(loc)
@@ -63,10 +78,31 @@ class Area:
         for i in data['import']:
             self.load_import(world, i)
         self.load_map(world, data['map']) 
+        # FIXME: probably this will be removed when we take into account units
+        # that can be in water or blocking areas
+        self.recalculate_free_locations()
         for g in data['gates']:
             gate = int(g['id'])
             dest = g['dest']
             self.gates[gate]['next'] = dest
+        for u in data['units']:
+            if u['type'] == 'unique':
+                pass
+            elif u['type'] == 'fill':
+                # FIXME: should probably be non-blocking grids instead of just
+                # w*h
+                units = (self.w * self.h) / u['density']
+                unit_types = u['unit_types']
+                sum_prob = sum([ut['prob'] for ut in unit_types])
+                for i in range(units):
+                    rnd = randint(0, sum_prob - 1)
+                    s = 0
+                    for ut in unit_types:
+                        s = s + ut['prob']
+                        if rnd < s:    
+                            c = Character.load_from_data(ut['data'])
+                            self.place_character(c, self.random_free_location(c))
+                            break
 
     def load_import(self, world, name):
         f = open('data/worlds/%s/%s' % (world, name))
@@ -89,10 +125,10 @@ class Area:
 
     def select_image(self, image_list, prob_max):
         rnd = randint(0, prob_max - 1) 
-        sum = 0
+        s = 0
         for img in image_list:
-            sum = sum + img['prob']
-            if rnd < sum:
+            s = s + img['prob']
+            if rnd < s:
                 return img['image']
 
     def load_map(self, world, name):
@@ -127,6 +163,11 @@ class Area:
                 if t.has_key('volume'):
                     self.map[i][j]['volume_image'] = \
                         self.select_image(t['volume'], t['volume_prob_sum'])
+        self.w, self.h = self.map.shape
+
+    def random_free_location(self, unit):
+        loc = choice(self.free_locations.keys())
+        return loc
 
     def can_move(self, unit, loc): 
         #FIXME: probably we want to remove this trivial check from here
@@ -145,7 +186,11 @@ class Area:
         return path
 
     def can_pass(self, unit, loc): 
+        # FIXME: for now we don't use unit, go over uses of can_pass if 
+        # we actually start requiring it
         if self.map[loc.x][loc.y]['tile']['type'] != 'normal':
+            return False
+        if self.map[loc.x][loc.y].has_key('character'):
             return False
         return True
 

@@ -8,3 +8,20 @@ gates:
       dest: {area: 'world' }
     - id: 3
       dest: {area: 'world' }
+units:
+    - type: 'unique'
+      name: 'lieutenant_reddick'
+    - type: 'fill'
+      density: 20
+      unit_types:
+#          - data:
+#                unit: 'peasant'
+#            prob: 3
+          - data:
+                race: 'human'
+                class: 'warrior'
+            prob: 1
+          - data:
+                race: 'human'
+                class: 'mage'
+            prob: 1
